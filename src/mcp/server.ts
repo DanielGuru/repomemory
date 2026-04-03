@@ -14,6 +14,7 @@ import { SearchIndex, type SearchExplain } from "../lib/search.js";
 import { createEmbeddingProvider } from "../lib/embeddings.js";
 import type { RepoContextConfig } from "../lib/config.js";
 import { resolveGlobalDir } from "../lib/config.js";
+import { assessFileRisk, analyzeGitIntelligence } from "../lib/git-intelligence.js";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
@@ -465,6 +466,33 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
           },
           annotations: {
             title: "Auto Orient",
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: false,
+          },
+        },
+        {
+          name: "context_risk",
+          description:
+            "Assess modification risk for files BEFORE editing them. Analyzes git history to surface: hotspot files (high churn), hidden coupling (files that always change together), ownership concentration (bus factor). Use this when you're about to modify important files to understand what else might need to change and what risks to watch for.",
+          inputSchema: {
+            type: "object" as const,
+            properties: {
+              targets: {
+                type: "array",
+                items: { type: "string" },
+                description:
+                  "File paths to assess (relative to repo root). Example: ['src/lib/auth.ts', 'src/api/routes.ts']. If omitted, returns global hotspot overview.",
+              },
+              maxCommits: {
+                type: "number",
+                description: "Max git commits to analyze (default: 500). Lower = faster, higher = more accurate.",
+              },
+            },
+          },
+          annotations: {
+            title: "Risk Assessment",
             readOnlyHint: true,
             destructiveHint: false,
             idempotentHint: true,
@@ -1204,6 +1232,96 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
         }
 
         session.readCallCount++;
+        return { content: [{ type: "text" as const, text: parts.join("\n") + getWriteNudge() }] };
+      }
+
+      case "context_risk": {
+        const { targets, maxCommits = 500 } = (args || {}) as {
+          targets?: string[];
+          maxCommits?: number;
+        };
+
+        session.toolCalls.push({ tool: "context_risk", timestamp: new Date() });
+        session.readCallCount++;
+
+        const parts: string[] = [];
+
+        if (targets && targets.length > 0) {
+          // Targeted risk assessment
+          const result = assessFileRisk(repoRoot, targets, { maxCommits });
+
+          parts.push(`# Risk Assessment (${result.globalHotspots.length > 0 ? "from " + maxCommits + " commits" : "no git history"})\n`);
+
+          for (const a of result.assessments) {
+            const icon = a.riskLevel === "high" ? "\u26a0\ufe0f" : a.riskLevel === "medium" ? "\u26a1" : "\u2705";
+            parts.push(`## ${icon} ${a.file} — ${a.riskLevel} risk`);
+
+            if (a.riskFactors.length > 0) {
+              for (const f of a.riskFactors) {
+                parts.push(`- ${f}`);
+              }
+            } else {
+              parts.push("- No significant risk factors detected");
+            }
+
+            if (a.ownership) {
+              parts.push(`- **Owner:** ${a.ownership.primaryOwner} (${a.ownership.ownershipPct}%), bus factor: ${a.ownership.busFactor}`);
+            }
+
+            if (a.coChangePartners.length > 0) {
+              parts.push("- **Often changes with:**");
+              for (const c of a.coChangePartners) {
+                const partner = c.fileA === a.file ? c.fileB : c.fileA;
+                parts.push(`  - ${partner} (${c.coChangeCount} co-changes, confidence: ${c.confidence})`);
+              }
+            }
+            parts.push("");
+          }
+
+          // Add global hotspots for context
+          if (result.globalHotspots.length > 0) {
+            parts.push("## Top Hotspots (for context)\n");
+            for (const h of result.globalHotspots) {
+              parts.push(`- ${h.file} — score: ${h.score}, ${h.commits} commits, ${h.churn} lines churned`);
+            }
+          }
+        } else {
+          // Global overview mode
+          const intel = analyzeGitIntelligence(repoRoot, { maxCommits, topN: 15 });
+
+          if (intel.analyzedCommits === 0) {
+            return {
+              content: [{ type: "text" as const, text: "No git history found. Is this a git repository?" }],
+            };
+          }
+
+          parts.push(`# Git Intelligence Overview (${intel.analyzedCommits} commits over ${intel.timespan})\n`);
+
+          if (intel.hotspots.length > 0) {
+            parts.push("## Hotspot Files (high churn — modify with care)\n");
+            for (const h of intel.hotspots.slice(0, 10)) {
+              parts.push(`- **${h.file}** — score: ${h.score}, ${h.commits} commits, ${h.churn} lines churned, ${h.authors} authors`);
+            }
+            parts.push("");
+          }
+
+          if (intel.coChangePairs.length > 0) {
+            parts.push("## Hidden Coupling (files that change together)\n");
+            for (const c of intel.coChangePairs.slice(0, 10)) {
+              parts.push(`- ${c.fileA} \u2194 ${c.fileB} — ${c.coChangeCount} co-changes (confidence: ${c.confidence})`);
+            }
+            parts.push("");
+          }
+
+          if (intel.ownership.length > 0) {
+            parts.push("## Ownership Concentration\n");
+            for (const o of intel.ownership) {
+              const risk = o.busFactor === 1 ? " \u26a0\ufe0f bus-factor risk" : "";
+              parts.push(`- **${o.file}** — ${o.primaryOwner} (${o.ownershipPct}%), bus factor: ${o.busFactor}${risk}`);
+            }
+          }
+        }
+
         return { content: [{ type: "text" as const, text: parts.join("\n") + getWriteNudge() }] };
       }
 

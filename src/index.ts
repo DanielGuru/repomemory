@@ -13,6 +13,7 @@ import { hookCommand } from "./commands/hook.js";
 import { goCommand } from "./commands/go.js";
 import { searchCommand } from "./commands/search.js";
 import { doctorCommand } from "./commands/doctor.js";
+import { riskCommand } from "./commands/risk.js";
 import {
   globalListCommand,
   globalReadCommand,
@@ -123,6 +124,16 @@ program
   .option("--json", "Output machine-readable JSON", false)
   .option("--output <path>", "Write a diagnostics bundle to this file")
   .action(doctorCommand);
+
+program
+  .command("risk")
+  .description("Analyze git history for hotspots, hidden coupling, and ownership risk")
+  .option("-d, --dir <path>", "Repository root directory", process.cwd())
+  .option("-f, --files <files>", "Comma-separated file paths to assess (e.g. src/auth.ts,src/api.ts)")
+  .option("-l, --limit <n>", "Max results per category", "15")
+  .option("--max-commits <n>", "Max git commits to analyze", "500")
+  .option("--json", "Output results as JSON", false)
+  .action(riskCommand);
 
 program
   .command("go")

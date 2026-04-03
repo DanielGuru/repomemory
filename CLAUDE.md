@@ -59,10 +59,11 @@ src/
 │   ├── hook.ts               # Git post-commit hook install/uninstall.
 │   ├── go.ts                 # One-command setup: init + analyze + setup claude + global profile.
 │   ├── search.ts             # CLI search across repo + global context. Hybrid FTS5 + vector.
+│   ├── risk.ts               # Git intelligence CLI: hotspots, co-change, ownership analysis.
 │   └── global.ts             # Manage global developer context (~/.repomemory/global/).
 │                               list, read, write, delete, export, import subcommands.
 ├── mcp/
-│   └── server.ts             # MCP server. 6 tools + 2 prompts + resources.
+│   └── server.ts             # MCP server. 7 tools + 2 prompts + resources.
 │                               Dual-store: repo (.context/) + global (~/.repomemory/global/).
 │                               Scope routing: preferences→global, everything else→repo.
 │                               Session tracking, auto-capture on shutdown,
@@ -88,6 +89,9 @@ src/
     │                           repairTruncatedJSON. Extracted from analyze.ts for testability.
     ├── git.ts                 # Git info extraction using execFileSync (no shell injection).
     │                           getLastCommitHash() for sync deduplication.
+    ├── git-intelligence.ts    # Git history analysis: hotspots (churn×commits), co-change
+    │                           detection (Jaccard similarity), file ownership & bus factor.
+    │                           analyzeGitIntelligence() for overview, assessFileRisk() for targets.
     └── repo-scanner.ts        # Walks repo tree respecting .gitignore, detects languages/
                                 frameworks across JS, Python, Rust, Go, Ruby ecosystems.
 ```
@@ -146,6 +150,7 @@ node dist/index.js --help
 | `setup <tool>`    | setup.ts     | Tool integration (7 tools)                                          |
 | `status`          | status.ts    | Coverage + freshness                                                |
 | `search <query>`  | search.ts    | Search knowledge base from terminal (--category, --limit, --detail) |
+| `risk`            | risk.ts      | Git intelligence: hotspots, co-change, ownership                    |
 | `doctor`          | doctor.ts    | Diagnostics, health checks, support bundles                         |
 | `dashboard`       | dashboard.ts | Web UI on localhost:3333                                            |
 | `hook <action>`   | hook.ts      | Git hook install/uninstall                                          |
@@ -161,6 +166,7 @@ node dist/index.js --help
 | `context_list`        | List entries from both stores with [repo]/[global] provenance tags.                           |
 | `context_read`        | Read full content. Repo-first, falls back to global.                                          |
 | `context_auto_orient` | Project orientation: index + global preferences + repo preferences + sessions + recent.       |
+| `context_risk`        | Git intelligence: hotspot scores, co-change partners, ownership, bus factor, risk level.       |
 
 ## Common Issues
 
