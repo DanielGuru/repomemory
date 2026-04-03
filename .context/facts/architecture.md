@@ -4,23 +4,26 @@
 repomemory is a single-package CLI + MCP server. No microservices. Deployed as an npm package.
 
 ## Entry Points
-- `src/index.ts` — CLI entry (Commander.js), registers 10 commands, global error handlers
+- `src/index.ts` — CLI entry (Commander.js), registers 11 commands, global error handlers
 - `src/mcp/server.ts` — MCP server with 6 tools + 2 prompts + resources
 - `dist/index.js` — compiled binary (has shebang, set by `scripts/build.js`)
 
 ## Command → File Map
 | Command | File |
 |---------|------|
-| `go` | `src/commands/go.ts` — init + analyze + setup in one |
-| `wizard` | `src/commands/wizard.ts` — interactive setup via @clack/prompts |
+| `go` | `src/commands/go.ts` — init + analyze + setup claude + auto-detect cursor |
+| `wizard` | `src/commands/wizard.ts` — interactive setup via @clack/prompts (cursor-only mode) |
 | `init` | `src/commands/init.ts` — scaffolds `.context/` + `.repomemory.json` |
 | `analyze` | `src/commands/analyze.ts` — AI-powered repo analysis |
 | `sync` | `src/commands/sync.ts` — git log → `.context/changelog/YYYY-MM.md` |
 | `serve` | `src/commands/serve.ts` — thin wrapper calling `startMcpServer()` |
-| `setup` | `src/commands/setup.ts` — 7 tool integrations |
+| `setup` | `src/commands/setup.ts` — 7 tool integrations (claude, cursor, copilot, windsurf, cline, aider, continue) |
 | `status` | `src/commands/status.ts` — coverage bars + freshness |
+| `search` | `src/commands/search.ts` — CLI search with --json, --explain |
+| `doctor` | `src/commands/doctor.ts` — diagnostics + health checks |
 | `dashboard` | `src/commands/dashboard.ts` — localhost:3333 web UI |
 | `hook` | `src/commands/hook.ts` — git post-commit hook install/uninstall |
+| `global` | `src/commands/global.ts` — manage global developer context |
 
 ## MCP Tools (src/mcp/server.ts)
 | Tool | Description |

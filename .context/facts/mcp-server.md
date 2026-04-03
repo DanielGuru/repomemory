@@ -13,7 +13,7 @@
 - Optional `supersedes` parameter for auto-delete of old entry
 
 ## Tool Annotations
-All tools have MCP annotations (added in v0.2.1) for better client display.
+All tools have MCP annotations for better client display.
 
 ## Prompts
 2 MCP prompts registered (in addition to 6 tools).
@@ -23,21 +23,40 @@ MCP resources registered for direct file access.
 
 ## Starting the Server
 ```bash
-# Via CLI
 npx repomemory serve
-
-# Via npm dev
 npm run dev -- serve --dir /path/to/repo
 ```
 
-## Claude Code Integration
-`repomemory setup claude` writes to `~/.claude.json` (the actual MCP config file).
-The MCP server auto-starts with Claude Code after setup.
+## Tool Integrations
+
+### Claude Code
+`repomemory setup claude` writes MCP server to `~/.claude.json` + post-commit hook to `.claude/hooks/`.
+
+### Cursor (v1.10.0)
+`repomemory setup cursor` installs:
+- MCP server in `~/.cursor/mcp.json` (global, auto-starts in every project)
+- Rules file at `.cursor/rules/repomemory.mdc` (teaches Cursor AI to use MCP tools)
+- 6 slash commands in `.cursor/commands/`:
+  - `/repomemory-analyze` — full repo analysis via Cursor's AI
+  - `/repomemory-orient` — quick project orientation
+  - `/repomemory-search` — search knowledge base
+  - `/repomemory-record` — record a fact, decision, or regression
+  - `/repomemory-session` — save session summary
+  - `/repomemory-status` — show context coverage
+
+**No API key required** — Cursor users populate `.context/` entirely through Cursor's built-in AI via MCP tools.
+
+### Other Tools
+- Copilot: `.github/copilot-instructions.md`
+- Windsurf: `.windsurfrules`
+- Cline: `.clinerules`
+- Aider: `.aider.conf.yml`
+- Continue: `.continue/rules/repomemory.md`
 
 ## Skills
 - `skills/repomemory/SKILL.md` — main skill
 - `skills/session-start/SKILL.md` — session start behavior
-- `skills/session-end/SKILL.md` — session end behavior (auto-capture)
+- `skills/session-end/SKILL.md` — session end behavior
 
 ## Server Config
-`server.json` — MCP registry metadata
+`server.json` — MCP registry metadata, version auto-synced from package.json via `npm run sync:versions`

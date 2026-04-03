@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.11.0 (2026-04-03)
+
+### New Features
+- **Git intelligence** — New `repomemory risk` CLI command and `context_risk` MCP tool. Analyzes git history for hotspot files (high churn), hidden coupling (co-change detection via Jaccard similarity), ownership concentration, and bus factor
+- **Risk-aware agent workflow** — `context_auto_orient` now surfaces top risk hotspots at session start; `start-task` prompt instructs agents to call `context_risk` before modifying files; CLAUDE_MD_BLOCK includes risk assessment in "Before modifying code" instructions
+
+### Fixes
+- **`process.exit(1)` in risk command** — Replaced with `throw` to prevent killing the process when called programmatically (e.g., from `go.ts`)
+- **MCP manifest missing `context_risk`** — Added to `server.json` so MCP clients can discover the tool
+- **README gaps** — Added `context_risk` to MCP tools table, `risk` command to commands list, updated tool count from 6 to 7
+
 ## 1.10.0 (2026-02-22)
 
 ### New Features

@@ -234,7 +234,7 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
             role: "user" as const,
             content: {
               type: "text" as const,
-              text: `I'm about to work on: ${task}\n\nYou MUST search the repository's persistent knowledge base for relevant context before starting. Use context_search with relevant keywords, and call context_auto_orient if this is a new session. Do NOT skip this step.`,
+              text: `I'm about to work on: ${task}\n\nYou MUST search the repository's persistent knowledge base for relevant context before starting. Use context_search with relevant keywords, and call context_auto_orient if this is a new session. Before modifying any files, call context_risk with the file paths you plan to change — it reveals hidden coupling, ownership concentration, and churn hotspots. Do NOT skip these steps.`,
             },
           },
         ],
@@ -1229,6 +1229,20 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
               "\n> **Note**: Context is mostly empty. Ask the user to run `npx repomemory analyze` to populate with architecture knowledge."
             );
           }
+        }
+
+        // 7. Top risk hotspots (quick git intelligence)
+        try {
+          const intel = analyzeGitIntelligence(repoRoot, { maxCommits: 200, topN: 5 });
+          if (intel.hotspots.length > 0) {
+            parts.push("\n# Risk Hotspots (high-churn files — use `context_risk` before modifying)\n");
+            for (const h of intel.hotspots.slice(0, 5)) {
+              const level = h.score >= 0.7 ? "\u26a0\ufe0f" : h.score >= 0.4 ? "\u26a1" : "";
+              parts.push(`- ${level} ${h.file} — score: ${h.score}, ${h.commits} commits, ${h.churn} lines churned`);
+            }
+          }
+        } catch {
+          // Git intelligence is best-effort in orient
         }
 
         session.readCallCount++;

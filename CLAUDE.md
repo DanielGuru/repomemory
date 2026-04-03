@@ -25,6 +25,7 @@ Do NOT skip this step even if the task seems simple.**
 
 - You MUST search for known regressions related to the component
 - You MUST check for past decisions before proposing alternatives
+- Call `context_risk` with the file paths you plan to modify — it reveals hidden coupling (files that must change together), ownership concentration, and churn hotspots
 
 **At end of session (REQUIRED):**
 

@@ -2,12 +2,12 @@
   "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
   "name": "io.github.DanielGuru/repomemory",
   "description": "Persistent, structured memory for AI coding agents. Hybrid keyword + semantic search, auto-session capture, intelligent category routing. Your codebase never forgets.",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "packages": [
     {
       "registry": "npm",
       "name": "repomemory",
-      "version": "1.10.0",
+      "version": "1.11.0",
       "runtime": "node",
       "args": [
         "dist/index.js",
@@ -42,6 +42,10 @@
     {
       "name": "context_auto_orient",
       "description": "Get comprehensive project orientation in one call — index, sessions, recent changes"
+    },
+    {
+      "name": "context_risk",
+      "description": "Assess modification risk for files — hotspots, hidden coupling, ownership concentration, bus factor"
     }
   ],
   "_meta": {

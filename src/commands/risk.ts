@@ -61,8 +61,7 @@ export async function riskCommand(options: {
   const intel = analyzeGitIntelligence(repoRoot, { maxCommits, topN });
 
   if (intel.analyzedCommits === 0) {
-    console.log(chalk.red("✗ No git history found. Is this a git repository?"));
-    process.exit(1);
+    throw new Error("No git history found. Is this a git repository?");
   }
 
   if (options.json) {

@@ -107,7 +107,7 @@ No prompts when `--yes` / `--defaults` / `--no-prompt` is used.
 
 ## MCP Server — Agents With Real Memory
 
-The real power is the MCP server. When configured via `repomemory setup claude`, it auto-starts with Claude Code and gives agents 6 tools:
+The real power is the MCP server. When configured via `repomemory setup claude`, it auto-starts with Claude Code and gives agents 7 tools:
 
 | Tool | What It Does |
 |------|-------------|
@@ -116,6 +116,7 @@ The real power is the MCP server. When configured via `repomemory setup claude`,
 | `context_write` | Write entries with smart scope routing (preferences → global) |
 | `context_read` | Read full content, repo-first with global fallback |
 | `context_list` | Browse entries with `[repo]`/`[global]` provenance tags |
+| `context_risk` | Assess modification risk — hotspots, hidden coupling, bus factor |
 | `context_delete` | Remove stale knowledge |
 
 ```
@@ -171,6 +172,8 @@ repomemory search <query>                # Search knowledge base from terminal
 repomemory status                        # Coverage and freshness report
 repomemory doctor                        # Diagnostics and health check
 repomemory dashboard                     # Local web UI (localhost:3333)
+repomemory risk                          # Hotspots, coupling, ownership analysis
+repomemory risk -f src/auth.ts           # Targeted risk assessment for specific files
 repomemory sync                          # Sync git history to changelog
 repomemory setup <tool>                  # Configure Claude/Cursor/Copilot/etc
 repomemory hook install                  # Auto-sync changelog on commits

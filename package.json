@@ -1,6 +1,6 @@
 {
   "name": "repomemory",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Your codebase never forgets. Persistent, structured memory for AI coding agents.",
   "type": "module",
   "bin": {
