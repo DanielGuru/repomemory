@@ -58,11 +58,7 @@ function git(args: string[], cwd: string, timeout = 30_000): string {
  */
 function analyzeHotspots(repoRoot: string, maxCommits: number): FileHotspot[] {
   // Get per-file change stats from git log
-  const log = git(
-    ["log", `--max-count=${maxCommits}`, "--no-merges", "--format=%H", "--numstat"],
-    repoRoot,
-    60_000
-  );
+  const log = git(["log", `--max-count=${maxCommits}`, "--no-merges", "--format=%H", "--numstat"], repoRoot, 60_000);
 
   if (!log) return [];
 
@@ -73,11 +69,7 @@ function analyzeHotspots(repoRoot: string, maxCommits: number): FileHotspot[] {
 
   // Also get per-commit authors
   const commitAuthors = new Map<string, string>();
-  const authorLog = git(
-    ["log", `--max-count=${maxCommits}`, "--no-merges", "--format=%H%x00%an"],
-    repoRoot,
-    30_000
-  );
+  const authorLog = git(["log", `--max-count=${maxCommits}`, "--no-merges", "--format=%H%x00%an"], repoRoot, 30_000);
   for (const line of authorLog.split("\n")) {
     const [hash, author] = line.split("\0");
     if (hash && author) commitAuthors.set(hash, author);
@@ -155,11 +147,7 @@ function analyzeHotspots(repoRoot: string, maxCommits: number): FileHotspot[] {
  */
 function analyzeCoChanges(repoRoot: string, maxCommits: number, minCoChanges = 3): CoChangePair[] {
   // Get files per commit
-  const log = git(
-    ["log", `--max-count=${maxCommits}`, "--no-merges", "--format=%H", "--name-only"],
-    repoRoot,
-    60_000
-  );
+  const log = git(["log", `--max-count=${maxCommits}`, "--no-merges", "--format=%H", "--name-only"], repoRoot, 60_000);
 
   if (!log) return [];
 
@@ -292,11 +280,7 @@ export function analyzeGitIntelligence(
 
   let timespan = "N/A";
   if (analyzedCommits > 0) {
-    const oldestDate = git(
-      ["log", `--max-count=${maxCommits}`, "--reverse", "--format=%ai", "HEAD"],
-      repoRoot,
-      30_000
-    )
+    const oldestDate = git(["log", `--max-count=${maxCommits}`, "--reverse", "--format=%ai", "HEAD"], repoRoot, 30_000)
       .split("\n")
       .filter(Boolean)[0];
 
@@ -355,7 +339,9 @@ export function assessFileRisk(
     const riskFactors: string[] = [];
 
     if (hotspot && hotspot.score >= 0.7) {
-      riskFactors.push(`High churn hotspot (score: ${hotspot.score}, ${hotspot.commits} commits, ${hotspot.churn} lines changed)`);
+      riskFactors.push(
+        `High churn hotspot (score: ${hotspot.score}, ${hotspot.commits} commits, ${hotspot.churn} lines changed)`
+      );
     } else if (hotspot && hotspot.score >= 0.4) {
       riskFactors.push(`Moderate churn (score: ${hotspot.score}, ${hotspot.commits} commits)`);
     }

@@ -1264,7 +1264,9 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
           // Targeted risk assessment
           const result = assessFileRisk(repoRoot, targets, { maxCommits });
 
-          parts.push(`# Risk Assessment (${result.globalHotspots.length > 0 ? "from " + maxCommits + " commits" : "no git history"})\n`);
+          parts.push(
+            `# Risk Assessment (${result.globalHotspots.length > 0 ? "from " + maxCommits + " commits" : "no git history"})\n`
+          );
 
           for (const a of result.assessments) {
             const icon = a.riskLevel === "high" ? "\u26a0\ufe0f" : a.riskLevel === "medium" ? "\u26a1" : "\u2705";
@@ -1279,7 +1281,9 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
             }
 
             if (a.ownership) {
-              parts.push(`- **Owner:** ${a.ownership.primaryOwner} (${a.ownership.ownershipPct}%), bus factor: ${a.ownership.busFactor}`);
+              parts.push(
+                `- **Owner:** ${a.ownership.primaryOwner} (${a.ownership.ownershipPct}%), bus factor: ${a.ownership.busFactor}`
+              );
             }
 
             if (a.coChangePartners.length > 0) {
@@ -1314,7 +1318,9 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
           if (intel.hotspots.length > 0) {
             parts.push("## Hotspot Files (high churn — modify with care)\n");
             for (const h of intel.hotspots.slice(0, 10)) {
-              parts.push(`- **${h.file}** — score: ${h.score}, ${h.commits} commits, ${h.churn} lines churned, ${h.authors} authors`);
+              parts.push(
+                `- **${h.file}** — score: ${h.score}, ${h.commits} commits, ${h.churn} lines churned, ${h.authors} authors`
+              );
             }
             parts.push("");
           }
@@ -1322,7 +1328,9 @@ export async function startMcpServer(repoRoot: string, config: RepoContextConfig
           if (intel.coChangePairs.length > 0) {
             parts.push("## Hidden Coupling (files that change together)\n");
             for (const c of intel.coChangePairs.slice(0, 10)) {
-              parts.push(`- ${c.fileA} \u2194 ${c.fileB} — ${c.coChangeCount} co-changes (confidence: ${c.confidence})`);
+              parts.push(
+                `- ${c.fileA} \u2194 ${c.fileB} — ${c.coChangeCount} co-changes (confidence: ${c.confidence})`
+              );
             }
             parts.push("");
           }

@@ -39,7 +39,9 @@ export async function riskCommand(options: {
 
       if (a.ownership) {
         console.log(
-          chalk.dim(`   Owner: ${a.ownership.primaryOwner} (${a.ownership.ownershipPct}%), bus factor: ${a.ownership.busFactor}`)
+          chalk.dim(
+            `   Owner: ${a.ownership.primaryOwner} (${a.ownership.ownershipPct}%), bus factor: ${a.ownership.busFactor}`
+          )
         );
       }
 
@@ -95,7 +97,9 @@ export async function riskCommand(options: {
     console.log(chalk.bold.blue("  👤 Ownership Concentration\n"));
     for (const o of intel.ownership) {
       const risk = o.busFactor === 1 ? chalk.red(" ⚠️ bus-factor risk") : "";
-      console.log(`  ${chalk.bold(o.file)} — ${o.primaryOwner} (${o.ownershipPct}%), bus factor: ${o.busFactor}${risk}`);
+      console.log(
+        `  ${chalk.bold(o.file)} — ${o.primaryOwner} (${o.ownershipPct}%), bus factor: ${o.busFactor}${risk}`
+      );
     }
     console.log();
   }
